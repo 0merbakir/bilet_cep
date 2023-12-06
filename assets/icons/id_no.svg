@@ -1,0 +1,12 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- ID Card Body -->
+  <rect width="18" height="14" x="3" y="5" rx="2" fill="#FFFFFF" stroke="rgba(182, 102, 9, 0.75)" stroke-width="2"/>
+  <rect x="3" y="19" width="18" height="2" rx="1" fill="rgba(182, 102, 9, 0.75)"/>
+
+  <!-- Person Figure -->
+  <circle cx="12" cy="10" r="2" fill="rgba(182, 102, 9, 0.75)"/>
+  <path d="M12 12V16" stroke="rgba(182, 102, 9, 0.75)" stroke-width="2"/>
+
+  <!-- Text Label -->
+  <text x="12" y="22" font-size="2" font-family="Arial" fill="rgba(182, 102, 9, 0.75)" text-anchor="middle" alignment-baseline="middle">ID</text>
+</svg>
