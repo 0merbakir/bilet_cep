@@ -17,11 +17,13 @@ class PassengersInfo extends StatefulWidget {
       {super.key,
       required this.arrival,
       required this.departure,
-      required this.isOneDirection});
+      required this.goDate,
+      this.backDate});
 
   final String arrival;
   final String departure;
-  final bool isOneDirection;
+  DateTime goDate;
+  DateTime? backDate;
 
   @override
   State<PassengersInfo> createState() => _PassengersInfoState();
@@ -42,8 +44,8 @@ class _PassengersInfoState extends State<PassengersInfo> {
   var adultCount = 0;
   var childCount = 0;
 
-  DateTime? arrivalDate = DateTime.now(); // daha sonra değişecek
-  DateTime departureDate = DateTime.now();
+  String arrivalDate = ''; // daha sonra değişecek
+  String departureDate = '';
   int baggage = 0;
 
   final List<Ticket> tickets = [];
@@ -82,51 +84,29 @@ class _PassengersInfoState extends State<PassengersInfo> {
   void loadTickets() async {
     tickets.clear();
     for (int i = 0; i < adultCount; i++) {
-      if (!_formKeysAdult[i].currentState!.validate()) {
-        // await db
-        //     .collection('Tickets')
-        //     .doc(_controllersAdult[i][0].text.toString())
-        //     .set({
-        //   'ticketId': i + 1, // auto generated olmalı
-        //   'namesurname': _controllersAdult[i][0].text.toString(),
-        //   'phone': _controllersAdult[i][1].text.toString(),
-        //   'tcno': _controllersAdult[i][2].text.toString(),
-        //   'gender': _controllersAdult[i][3].text.toString(),
-        //   'birthdate': adultBirthDates[i].toString(),
-        // });
-
+      if (_formKeysAdult[i].currentState!.validate()) {
         tickets.add(
           Ticket.adult(
             nameSurname: _controllersAdult[i][0].text.toString(),
             gender: _controllersAdult[i][3].text.toString(),
-            birthDate: adultBirthDates[i].toString(),
+            birthDate: adultBirthDates[i],
             tcNo: _controllersAdult[i][2].text.toString(),
             phoneNumber: _controllersAdult[i][1].text.toString(),
           ),
         );
+        print(tickets[i]);
       } else {
         validatedAdultFormCounter++;
       }
     }
 
     for (int i = 0; i < childCount; i++) {
-      if (!_formKeysChild[i].currentState!.validate()) {
-        // await db
-        //     .collection('Tickets')
-        //     .doc(_controllersChild[i][0].text.toString())
-        //     .set({
-        //   'ticketId': i + 1,
-        //   'namesurname': _controllersChild[i][0].text.toString(),
-        //   'tcno': _controllersChild[i][1].text.toString(),
-        //   'gender': _controllersAdult[i][2].text.toString(),
-        //   'birthdate': adultBirthDates[i].toString(),
-        // });
-
+      if (_formKeysChild[i].currentState!.validate()) {
         tickets.add(
           Ticket.child(
             nameSurname: _controllersChild[i][0].text.toString(),
-            gender: _controllersAdult[i][2].text.toString(),
-            birthDate: childBirthDates[i].toString(),
+            gender: _controllersChild[i][2].text.toString(),
+            birthDate: childBirthDates[i],
             tcNo: _controllersChild[i][1].text.toString(),
           ),
         );
@@ -135,31 +115,31 @@ class _PassengersInfoState extends State<PassengersInfo> {
       }
     }
 
-    if (validatedChildFormCounter + validatedAdultFormCounter ==
-        adultCount + childCount) {
+    if (validatedChildFormCounter + validatedAdultFormCounter == 0) {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (ctx) => AvailableFlightsPage(
-              // tickets: tickets,
-              // departureDate: departureDate,
-              // arrivalDate: arrivalDate,
-              // baggage:
-              //     baggage
-              ), // tickets, departuredate, arrivaldate..., baggage
+            tickets: tickets,
+            arrival: widget.arrival,
+            departure: widget.departure,
+            goDate: widget.goDate,
+            backDate: widget.backDate,
+            baggage: baggage,
+          ),
         ),
       );
     }
 
     for (int i = 0; i < tickets.length; i++) {
-      print(tickets[i].nameSurname);
+      print(tickets[i].toString());
     }
   }
 
   void _presentDatePicker(String type, int i) async {
     final now = DateTime.now();
     final firstDate = DateTime(1900, now.month, now.day);
-    final lastDate = DateTime(1990, 12, 30);
+    final lastDate = DateTime.now();
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: now,
@@ -249,6 +229,7 @@ class _PassengersInfoState extends State<PassengersInfo> {
                               }).toList(),
                               onChanged: (newValue) {
                                 setState(() {
+                                  adultBirthDates.clear();
                                   validatedAdultFormCounter = 0;
                                   adultCount = newValue!;
                                   _formKeysAdult.clear();
@@ -300,6 +281,7 @@ class _PassengersInfoState extends State<PassengersInfo> {
                               }).toList(),
                               onChanged: (newValue) {
                                 setState(() {
+                                  childBirthDates.clear();
                                   validatedChildFormCounter = 0;
                                   childCount = newValue!;
                                   _formKeysChild.clear();
@@ -505,8 +487,11 @@ class _PassengersInfoState extends State<PassengersInfo> {
                                                         227,
                                                         227), // İstediğiniz rengi burada tanımlayabilirsiniz.
                                                   ),
-                                                  label: Text(
-                                                      "Doğum Tarihi"), // Düğme metni
+                                                  label: Text(adultBirthDates[i]
+                                                              .day ==
+                                                          DateTime.now().day
+                                                      ? "Doğum Tarihi"
+                                                      : '${adultBirthDates[i].day}/${adultBirthDates[i].month}/${adultBirthDates[i].year}'), // Düğme metni
                                                   style:
                                                       ElevatedButton.styleFrom(
                                                     backgroundColor:
@@ -516,9 +501,10 @@ class _PassengersInfoState extends State<PassengersInfo> {
                                                 ),
                                               ),
                                               Text(
-                                                adultBirthDates.isEmpty
+                                                adultBirthDates[i].day ==
+                                                        DateTime.now().day
                                                     ? ' Lütfen Doğum tarihinizi belirtin'
-                                                    : '${adultBirthDates[i].day}/${adultBirthDates[i].month}/${adultBirthDates[i].year}',
+                                                    : '',
                                                 style: TextStyle(
                                                     color: Color.fromRGBO(
                                                         182, 102, 9, 0.75),
@@ -703,8 +689,11 @@ class _PassengersInfoState extends State<PassengersInfo> {
                                                         227,
                                                         227), // İstediğiniz rengi burada tanımlayabilirsiniz.
                                                   ),
-                                                  label: Text(
-                                                      "Doğum Tarihi"), // Düğme metni
+                                                  label: Text(childBirthDates[i]
+                                                              .day ==
+                                                          DateTime.now().day
+                                                      ? "Doğum Tarihi"
+                                                      : '${childBirthDates[i].day}/${childBirthDates[i].month}/${childBirthDates[i].year}'), // Düğme metni
                                                   style:
                                                       ElevatedButton.styleFrom(
                                                     backgroundColor:
@@ -714,9 +703,10 @@ class _PassengersInfoState extends State<PassengersInfo> {
                                                 ),
                                               ),
                                               Text(
-                                                childBirthDates.isEmpty
+                                                childBirthDates[i].day ==
+                                                        DateTime.now().day
                                                     ? ' Lütfen Doğum tarihinizi belirtin'
-                                                    : '${childBirthDates[i].day}/${childBirthDates[i].month}/${childBirthDates[i].year}',
+                                                    : '',
                                                 style: TextStyle(
                                                     color: Color.fromRGBO(
                                                         182, 102, 9, 0.75),
@@ -754,7 +744,7 @@ class _PassengersInfoState extends State<PassengersInfo> {
                                                           _enteredGender =
                                                               'Kadın';
                                                           _controllersChild[i]
-                                                                      [3]
+                                                                      [2]
                                                                   .text =
                                                               _enteredGender;
                                                         });
@@ -780,7 +770,7 @@ class _PassengersInfoState extends State<PassengersInfo> {
                                                             _enteredGender =
                                                                 'Erkek';
                                                             _controllersChild[i]
-                                                                        [3]
+                                                                        [2]
                                                                     .text =
                                                                 _enteredGender;
                                                           },
@@ -800,98 +790,6 @@ class _PassengersInfoState extends State<PassengersInfo> {
                               ],
                             ),
                           SizedBox(height: 16),
-                          if (adultCount + childCount > 0)
-                            const Divider(
-                              color: Color.fromARGB(
-                                  255, 117, 71, 71), // Çizgi rengi
-                              thickness: 1, // Çizgi kalınlığı
-                              indent: 16, // Başlangıç boşluğu
-                              endIndent: 16, // Bitiş boşluğu
-                            ),
-                          if (adultCount + childCount > 0)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Column(
-                                  children: [
-                                    const Text(
-                                      "Gidiş Tarihi",
-                                      style: TextStyle(color: Colors.black54),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 8.0, bottom: 8),
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {
-                                          _presentDatePicker('', 0);
-                                          childBirthDates.add(_enteredDate!);
-                                        },
-                                        icon: Icon(
-                                          Icons.calendar_month,
-                                          color: Color.fromARGB(235, 241, 227,
-                                              227), // İstediğiniz rengi burada tanımlayabilirsiniz.
-                                        ),
-                                        label:
-                                            Text("Gidiş Tarihi"), // Düğme metni
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Color.fromRGBO(
-                                              182, 102, 9, 0.75), // Çizgi rengi
-                                        ),
-                                      ),
-                                    ),
-                                    Text(
-                                      childBirthDates.isEmpty
-                                          ? ' Lütfen gidiş tarihinizi belirtin'
-                                          : '${departureDate!.day}/${departureDate!.month}/${departureDate!.year}',
-                                      style: TextStyle(
-                                          color: Color.fromRGBO(
-                                              182, 102, 9, 0.75), // Çizgi rengi
-                                          fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(width: 36),
-                                if (!widget.isOneDirection)
-                                  Column(
-                                    children: [
-                                      const Text(
-                                        "Gönüş Tarihi",
-                                        style: TextStyle(color: Colors.black54),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 8.0, bottom: 8),
-                                        child: ElevatedButton.icon(
-                                          onPressed: () {
-                                            _presentDatePicker('', 0);
-                                            childBirthDates.add(_enteredDate!);
-                                          },
-                                          icon: Icon(
-                                            Icons.calendar_month,
-                                            color: Color.fromARGB(235, 241, 227,
-                                                227), // İstediğiniz rengi burada tanımlayabilirsiniz.
-                                          ),
-                                          label: Text(
-                                              "Gönüş Tarihi"), // Düğme metni
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color.fromRGBO(182,
-                                                102, 9, 0.75), // Çizgi rengi
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        childBirthDates.isEmpty
-                                            ? ' Lütfen dönüş tarihinizi belirtin'
-                                            : '${arrivalDate!.day}/${arrivalDate!.month}/${arrivalDate!.year}',
-                                        style: TextStyle(
-                                            color: Color.fromRGBO(182, 102, 9,
-                                                0.75), // Çizgi rengi
-                                            fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                              ],
-                            ),
                         ],
                       ),
                     ),
@@ -914,8 +812,6 @@ class _PassengersInfoState extends State<PassengersInfo> {
                       ),
                       onPressed: () {
                         _submit();
-                        // print('adult ${validatedAdultFormCounter.toString()}');
-                        // print('child ${validatedChildFormCounter.toString()}');
                       },
                       child: SvgPicture.asset("assets/icons/arrow_right.svg"),
                     ),

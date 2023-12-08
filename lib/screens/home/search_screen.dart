@@ -17,6 +17,9 @@ class _SearchScreenState extends State<SearchScreen> {
   var _selectedArrival;
   var _selectedDeparture;
   bool isOneDirecton = true;
+  DateTime? goDate;
+  DateTime? backDate;
+  DateTime? _enteredDate;
 
   Future<List<String>> fetchAirPlanes() async {
     var arrivalsRef = FirebaseFirestore.instance.collection('airplanes');
@@ -27,6 +30,31 @@ class _SearchScreenState extends State<SearchScreen> {
       allAirPlanes.add(arrival.id);
     }
     return allAirPlanes;
+  }
+
+  void _presentDatePicker(String dateType) async {
+    final now = DateTime.now();
+    final firstDate = DateTime.now();
+    final lastDate = DateTime(2024, 01, 30);
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
+
+    _enteredDate = pickedDate!;
+
+    if (dateType == 'goDate') {
+      setState(() {
+        goDate = pickedDate!;
+      });
+    }
+    if (dateType == 'backDate') {
+      setState(() {
+        backDate = pickedDate!;
+      });
+    }
   }
 
   @override
@@ -215,16 +243,44 @@ class _SearchScreenState extends State<SearchScreen> {
                           msg: "Lütfen Farklı bir rota seçin.",
                           toastLength: Toast.LENGTH_SHORT,
                         );
+                      } else if (isOneDirecton &&
+                          goDate!.day.toString().isEmpty) {
+                        Fluttertoast.showToast(
+                          msg: "Lütfen Gidiş tarihinizi belirtin.",
+                          toastLength: Toast.LENGTH_SHORT,
+                        );
+                      } else if (!isOneDirecton &&
+                          (goDate!.day.toString().isEmpty ||
+                              backDate!.day.toString().isEmpty)) {
+                        Fluttertoast.showToast(
+                          msg: "Lütfen gidiş ve dönüş tarihlerinizi belirtin.",
+                          toastLength: Toast.LENGTH_SHORT,
+                        );
                       } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PassengersInfo(
+                        if (isOneDirecton) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PassengersInfo(
                                 arrival: _selectedArrival,
                                 departure: _selectedDeparture,
-                                isOneDirection: isOneDirecton),
-                          ),
-                        );
+                                goDate: goDate!,
+                              ),
+                            ),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PassengersInfo(
+                                arrival: _selectedArrival,
+                                departure: _selectedDeparture,
+                                goDate: goDate!,
+                                backDate: backDate,
+                              ),
+                            ),
+                          );
+                        }
                       }
                     },
                     child: Container(
@@ -241,6 +297,99 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       ),
                     ),
+                  ),
+
+                  SizedBox(height: 24),
+                  const Divider(
+                    color: Color.fromARGB(255, 117, 71, 71), // Çizgi rengi
+                    thickness: 1, // Çizgi kalınlığı
+                    indent: 16, // Başlangıç boşluğu
+                    endIndent: 16, // Bitiş boşluğu
+                  ),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          const Text(
+                            "Gidiş Tarihi",
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0, bottom: 8),
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                _presentDatePicker('goDate');
+                              },
+                              icon: Icon(
+                                Icons.calendar_month,
+                                color: Color.fromARGB(235, 241, 227,
+                                    227), // İstediğiniz rengi burada tanımlayabilirsiniz.
+                              ),
+                              label: Text(goDate == null
+                                  ? "Gidiş Tarihi"
+                                  : "${goDate!.day}/${goDate!.month}/${goDate!.year}"), // Düğme metni
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: goDate == null
+                                    ? Color.fromRGBO(39, 100, 231, 0.175)
+                                    : Colors.blue, // Çizgi rengi
+                              ),
+                            ),
+                          ),
+                          Text(
+                            goDate == null
+                                ? ' Lütfen gidiş tarihinizi belirtin'
+                                : '',
+                            style: TextStyle(
+                                color: Color.fromRGBO(
+                                    9, 64, 182, 0.745), // Çizgi rengi
+                                fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 36),
+                      if (!isOneDirecton)
+                        Column(
+                          children: [
+                            const Text(
+                              "Gönüş Tarihi",
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 8.0, bottom: 8),
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  _presentDatePicker("backDate");
+                                },
+                                icon: Icon(
+                                  Icons.calendar_month,
+                                  color: Color.fromARGB(235, 241, 227,
+                                      227), // İstediğiniz rengi burada tanımlayabilirsiniz.
+                                ),
+                                label: Text(goDate == null
+                                    ? "Gidiş Tarihi"
+                                    : "${backDate!.day}/${backDate!.month}/${backDate!.year}"), // Düğme metni
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: backDate == null
+                                      ? Color.fromRGBO(39, 100, 231, 0.175)
+                                      : Colors.blue, // Çizgi rengi
+                                ),
+                              ),
+                            ),
+                            Text(
+                              backDate == null
+                                  ? ' Lütfen gidiş tarihinizi belirtin'
+                                  : '',
+                              style: TextStyle(
+                                  color: Color.fromRGBO(
+                                      9, 64, 182, 0.745), // Çizgi rengi
+                                  fontSize: 12),
+                            ),
+                          ],
+                        ),
+                    ],
                   ),
                   Gap(AppLayout.getHeight(30)),
                   Row(

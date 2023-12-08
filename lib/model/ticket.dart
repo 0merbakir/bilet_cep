@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+
 
 class Ticket {
   final String nameSurname;
   final String gender;
-  final String birthDate;
+  final DateTime birthDate;
   final String tcNo;
   final String? flightNo;
   final String? classType;
@@ -28,4 +28,8 @@ class Ticket {
     this.seat,
     this.flightNo,
   });
+
+    String toString() {
+    return 'Ticket{nameSurname: $nameSurname, gender: $gender, birthDate: $birthDate, tcNo: $tcNo, phoneNumber: $phoneNumber}';
+  }
 }

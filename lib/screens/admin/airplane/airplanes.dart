@@ -78,6 +78,27 @@ class _AirplanesPageState extends State<AirplanesPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+                          const Padding(
+                padding: EdgeInsets.all(6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.build_circle_sharp, // Uçak ikonu
+                      size: 32, // İkon boyutunu ayarlayın
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      'Mevcut Havaalanları',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(width: 8), // İkona ve metne boşluk ekleyin
+                  ],
+                ),
+              ),
               const Padding(
                 padding: EdgeInsets.all(6),
                 child: Row(
@@ -206,9 +227,9 @@ class _AirplanesPageState extends State<AirplanesPage> {
                                 width: 95,
                                 height: 50,
                                 child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    primary: Color.fromARGB(105, 22, 23,
-                                        34), // Button background color
+                                  style: ElevatedButton.styleFrom( 
+                                    primary: arrivals.isEmpty ? Color.fromARGB(105, 22, 23,
+                                        34) : Color.fromARGB(226, 22, 23, 34), // But,ton background color
                                     onPrimary: Color.fromARGB(
                                         237, 252, 252, 252), // Text color
                                     padding: EdgeInsets.all(
@@ -235,7 +256,7 @@ class _AirplanesPageState extends State<AirplanesPage> {
                                     ),
                                   ),
                                 ),
-                              )
+                              ) 
                             ],
                           ),
                           Wrap(
