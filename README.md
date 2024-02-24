@@ -1,15 +1,7 @@
-# Rive animation in flutter
+# flutter Flight Booking App for Senior Project I
 
-https://github.com/davfru/flutter-custom-login/assets/16302609/2b8a6229-a5fb-4803-97f3-ef3ddcfd986e
+I have designed a flutter app with Firebase Backend Service for my Senior Project I. A flight booking app which includes all reservation steps to buy a flight ticket just like real world
 
-Install an emulator (android or ios), then to run the app:
-
-```bash
-flutter pub get
-flutter run
-```
-
-credits: https://www.youtube.com/watch?v=Td3xEWwRAQA&t=23s
 
 
 
